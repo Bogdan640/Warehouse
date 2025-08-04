@@ -1,5 +1,6 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class Product {
 
@@ -44,6 +45,32 @@ public class Product {
         return 1.0; // Took as default for crackers pack
 
     }
+
+    private void manageExtraFields() {
+
+        switch (productCategory) {
+            case FRUITS:
+                extraFields.put("nutritional quality",  generateRandomNutritionalQuality());
+                break;
+            case VEGETABLES:
+                extraFields.put("nutritional quality",  generateRandomNutritionalQuality());
+                extraFields.put("producer", generateRandomProducer());
+                break;
+            case OTHERS:
+                break;
+        }
+    }
+
+    private String generateRandomNutritionalQuality() {
+        String qualities[] = {"1st quality", "2nd quality", "3rd quality"};
+        return qualities[new Random().nextInt(qualities.length)];
+    }
+
+    private String generateRandomProducer() {
+        String producer[] = {"Spain", "Italy", "Romania", "Greece", "Turkey"};
+        return producer[new Random().nextInt(producer.length)];
+    }
+
 
     public String getName() {
         return name;
@@ -99,6 +126,12 @@ public class Product {
 
     public void setKgPerUnit(double kgPerUnit) {
         this.kgPerUnit = kgPerUnit;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s (%s %s) - $%.2f per %s",
+                name, unitDetails, mesurableUnit.getName(), pricePerUnit, mesurableUnit.getName());
     }
 
 }
