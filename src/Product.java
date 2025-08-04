@@ -128,4 +128,10 @@ public class Product {
         this.kgPerUnit = kgPerUnit;
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s (%s %s) - $%.2f per %s",
+                name, unitDetails, mesurableUnit.getName(), pricePerUnit, mesurableUnit.getName());
+    }
+
 }

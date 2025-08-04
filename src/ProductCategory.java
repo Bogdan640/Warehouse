@@ -7,14 +7,14 @@ public enum ProductCategory {
     OTHERS ("Others", 0, 0.00);
 
     private final String name;
-    private final int weeksBeforeDiscount;
+    private final int weeksForDiscount; // The number of weeks before the expiration date
     private final double discountPercentage;
 
 
 
     ProductCategory(String name, int weeksBeforeDiscount, double dicountPercentage) {
         this.name = name;
-        this.weeksBeforeDiscount = weeksBeforeDiscount;
+        this.weeksForDiscount = weeksBeforeDiscount;
         this.discountPercentage = dicountPercentage;
     }
 
@@ -23,8 +23,8 @@ public enum ProductCategory {
         return name;
     }
 
-    public int getWeeksBeforeDiscount() {
-        return weeksBeforeDiscount;
+    public int getWeeksForDiscount() {
+        return weeksForDiscount;
     }
 
     public double getDicountPercentage() {

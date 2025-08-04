@@ -9,27 +9,6 @@ public class StoragePackage {
     private LocalDate expirationDate;
 
 
-    private double currentPrice;
-    private int discountPercentage;
-    private boolean thrownAway;
-    private String priceStatus;
-
-
-    public void setCurrentPrice(double currentPrice) {
-        this.currentPrice = currentPrice;
-    }
-
-    public void setDiscountPercentage(int discountPercentage) {
-        this.discountPercentage = discountPercentage;
-    }
-
-    public void setThrownAway(boolean thrownAway) {
-        this.thrownAway = thrownAway;
-    }
-
-    public void setPriceStatus(String priceStatus) {
-        this.priceStatus = priceStatus;
-    }
 
     public StoragePackage(Product product, int quantity, LocalDate entryDate, LocalDate expirationDate) {
         this.product = product;
@@ -47,37 +26,28 @@ public class StoragePackage {
         return product.getPricePerUnit() * quantity;
     }
 
-    public void updatePriceInfo(LocalDate currentDate) {
-        long weeksUntilExpiration = ChronoUnit.WEEKS.between(currentDate, expirationDate);
 
-        if (!currentDate.isBefore(expirationDate)) {
-            this.currentPrice = 0.0;
-            this.discountPercentage = 100;
-            this.thrownAway = true;
-            this.priceStatus = "Expired - thrown away";
-            return;
+    public PriceInfo getCurrentPrice(LocalDate currentDate){
+        int weeksUntilExpiration = (int) ChronoUnit.WEEKS.between(currentDate, expirationDate);
+        if (currentDate.isAfter(expirationDate) || currentDate.isEqual(expirationDate)) {
+            return new PriceInfo(0.0, 100, true);
         }
 
-        ProductCategory category = product.getProductCategory();
-        int discountStartWeeks = category.getWeeksBeforeDiscount();
+        ProductCategory productCategory = product.getProductCategory();
+        int weeksForDiscount = productCategory.getWeeksForDiscount();
 
-        if (weeksUntilExpiration <= discountStartWeeks && discountStartWeeks > 0) {
-            int weeksInDiscount = (int) (discountStartWeeks - weeksUntilExpiration);
-            double discountPct = Math.min(100, weeksInDiscount * category.getDicountPercentage() * 100);
-            this.discountPercentage = (int) discountPct;
-            this.currentPrice = getOriginalPrice() * (1 - discountPct / 100);
-            this.thrownAway = false;
-            this.priceStatus = String.format("%.0f%% discount (%d weeks before expiration)", discountPct, weeksUntilExpiration);
-        } else {
-            this.discountPercentage = 0;
-            this.currentPrice = getOriginalPrice();
-            this.thrownAway = false;
-            this.priceStatus = "No discount";
+        if(weeksUntilExpiration <= weeksForDiscount && weeksUntilExpiration >0 && weeksForDiscount > 0){
+            int weeksInDiscount = weeksForDiscount - weeksUntilExpiration;
+            double discountPercentage = productCategory.getDicountPercentage();
+            double originalPrice = getOriginalPrice();
+            double discountFactor = Math.pow(1-discountPercentage, weeksInDiscount);
+            double finalPrice = originalPrice * discountFactor;
+
+            return new PriceInfo(finalPrice, (int)(discountPercentage*100), false);
+
         }
+        return new PriceInfo(getOriginalPrice(), 0, false);
     }
-
-
-
 
 
     public Product getProduct() {
@@ -112,20 +82,12 @@ public class StoragePackage {
         this.expirationDate = expirationDate;
     }
 
-    public double getCurrentPrice() {
-        return currentPrice;
+    @Override
+    public String toString() {
+        return String.format("%s: %d %s (Entry: %s, Expires: %s)",
+                product.getName(), quantity, product.getMesurableUnit().getName(),
+                entryDate, expirationDate);
     }
 
-    public int getDiscountPercentage() {
-        return discountPercentage;
-    }
-
-    public boolean isThrownAway() {
-        return thrownAway;
-    }
-
-    public String getPriceStatus() {
-        return priceStatus;
-    }
 }
 
